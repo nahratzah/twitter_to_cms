@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+from __future__ import print_function
 import twitter
 import re
 
@@ -28,13 +29,13 @@ def loadChain(api, tweet_id):
   result = list()
   try:
     while True:
-      print u'Downloading {}...'.format(tweet_id)
+      print(u'Downloading {}...'.format(tweet_id))
       tweet = api.GetStatus(tweet_id)
       result.append(tweet)
       tweet_id = tweet.AsDict()['in_reply_to_status_id']
   except twitter.error.TwitterError as e:
-    print u'Warning, parent tweet {0} does not exist'.format(tweet_id)
-    print e
+    print(u'Warning, parent tweet {0} does not exist'.format(tweet_id))
+    print(e)
   except KeyError:
     pass # No more tweets
   result.reverse()
@@ -190,7 +191,7 @@ if __name__ == '__main__':
   try:
     last_tweet = sys.argv[1]
   except IndexError:
-    print 'Please invoke as: %s tweet_id' % (sys.argv[0],)
+    print('Please invoke as: %s tweet_id' % (sys.argv[0],))
     sys.exit(1)
 
   keys = get_access_token(
@@ -199,15 +200,15 @@ if __name__ == '__main__':
 
   api = twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
 
-  print '<!--'
+  print('<!--')
   chain = loadChain(api, last_tweet)
   if len(chain) == 0:
-    print "No tweets."
-  print '-->'
-  print
+    print("No tweets.")
+  print('-->')
+  print()
 
   if len(chain) > 0:
-    print u'{0.created_at}\n\n'.format(chain[0])
+    print(u'{0.created_at}\n\n'.format(chain[0]))
     for x in chain:
       sys.stdout.write(formatTextTweet(x).encode('utf8'))
-    print
+    print()
