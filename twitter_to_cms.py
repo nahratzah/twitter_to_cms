@@ -51,11 +51,11 @@ def renderMedia(tweet):
   if tweet.media is None or len(tweet.media) == 0:
     return None
   images = [
-    u'<img class="tweetImage {0.type}" src="{0.media_url_https}" alt="{1}" /> '.format(img, htmlEscape(img.ext_alt_text, True))
+    u'<img class="tweetImage {0.type}" src="{0.media_url_https}" alt="{1}" />'.format(img, htmlEscape(img.ext_alt_text, True))
     for img in tweet.media
     ]
   imageCount = len(images)
-  return u'<div class="tweetMedia tweetMediaCount{1}">{0}</div>'.format(u'\n'.join(images), imageCount)
+  return u'<div class="tweetMedia tweetMediaCount{1}">{0}</div>'.format(u''.join(images), imageCount)
 
 
 def removeMediaLinks(tweet, txt):
@@ -131,7 +131,7 @@ def applyRetweet(tweet, txt):
   if tweet.quoted_status is None:
     return txt
   quoted = formatTextTweet(tweet.quoted_status, tweetClass=u'retweet', nestRetweets=False)
-  return u'{0}\n{1}'.format(txt, quoted)
+  return u'{0}\n\n{1}'.format(txt, quoted)
 
 
 def removeRetweetLink(tweet, txt):
@@ -175,13 +175,7 @@ def formatTextTweet(tweet, tweetClass=u'tweet', **kw):
       tweet: a tweet to convert to a HTML block.
   """
   media = renderMedia(tweet)
-  return u"""
-    <p class="{1}">
-      <a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a>
-      <span class="tweetText">{2}</span>
-      {3}
-    </p>
-    """.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
+  return u'<div class="{1}"><a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a><span class="tweetText">{2}</span>{3}</div>'.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
 
 
 if __name__ == '__main__':
@@ -208,7 +202,8 @@ if __name__ == '__main__':
   print()
 
   if len(chain) > 0:
-    print(u'{0.created_at}\n\n'.format(chain[0]))
-    for x in chain:
-      sys.stdout.write(formatTextTweet(x).encode('utf8'))
+    doc = (
+        u'{0.created_at}\n\n'.format(chain[0]) +
+        u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in chain))
+    sys.stdout.write(doc.encode('utf8'))
     print()
