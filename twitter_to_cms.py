@@ -178,6 +178,32 @@ def formatTextTweet(tweet, tweetClass=u'tweet', **kw):
   return u'<div class="{1}"><a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a><span class="tweetText">{2}</span>{3}</div>'.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
 
 
+def buildTwitterApi():
+  """ Create the twitter API.
+      Handles acquiring authentication token.
+  """
+  keys = get_access_token(
+      consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
+      consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX')
+  return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
+
+
+def createTweetDoc(api, tweetId):
+  """ Create a unicode string with HTML, representing the tweet document.
+
+      throws: LookupError exception if the thread can not be downloaded.
+
+      api: a twitter API, with tweet_mode='extended'
+      tweetId: the numeric ID of the last tweet in the thread that is to be rendered.
+  """
+  chain = loadChain(api, last_tweet)
+  if len(chain) == 0:
+    raise LookupError('No tweet found.')
+  return (u'<!-- Created at: {0.created_at} -->\n\n'.format(chain[0])
+      + u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in chain)
+      )
+
+
 if __name__ == '__main__':
   import sys
   from get_access_token import get_access_token
@@ -188,22 +214,12 @@ if __name__ == '__main__':
     print('Please invoke as: %s tweet_id' % (sys.argv[0],))
     sys.exit(1)
 
-  keys = get_access_token(
-      consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
-      consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX')
+  api = buildTwitterApi()
+  try:
+    doc = createTweetDoc(api, last_tweet)
+  except LookupError as e:
+    print(e)
+    sys.exit(1)
 
-  api = twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
-
-  print('<!--')
-  chain = loadChain(api, last_tweet)
-  if len(chain) == 0:
-    print("No tweets.")
-  print('-->')
+  sys.stdout.write(doc.encode('utf8'))
   print()
-
-  if len(chain) > 0:
-    doc = (
-        u'{0.created_at}\n\n'.format(chain[0]) +
-        u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in chain))
-    sys.stdout.write(doc.encode('utf8'))
-    print()
