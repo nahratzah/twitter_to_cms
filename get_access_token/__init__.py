@@ -89,7 +89,6 @@ class WxAccessTokenDialog(wx.Dialog):
         vbox.AddStretchSpacer(1)
         vbox.Add(self.CreateButtonSizer(wx.OK | wx.CANCEL), flag=wx.ALIGN_CENTER)
         self.SetSizer(vbox)
-        print(pincodeFieldSizer)
 
         self.Bind(wx.EVT_BUTTON, self.onGrantAccess_, id=1)
 
