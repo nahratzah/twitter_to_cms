@@ -182,9 +182,25 @@ def buildTwitterApi():
   """ Create the twitter API.
       Handles acquiring authentication token.
   """
+  from get_access_token import get_access_token
+
   keys = get_access_token(
       consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
       consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX')
+  return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
+
+
+def wxBuildTwitterApi():
+  """ Create the twitter API.
+      Handles acquiring authentication token.
+  """
+  from get_access_token import wxGetAccessToken
+
+  keys = wxGetAccessToken(
+      consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
+      consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX',
+      parent=None,
+      title='Twitter to CMS: twitter authorization')
   return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
 
 
@@ -206,7 +222,6 @@ def createTweetDoc(api, tweetId):
 
 def old_main():
   import sys
-  from get_access_token import get_access_token
 
   try:
     last_tweet = sys.argv[1]
@@ -226,11 +241,9 @@ def old_main():
 
 
 if __name__ == '__main__':
-  import gi
-  gi.require_version("Gtk", "3.0")
-  from gi.repository import Gtk
-
-  window = Gtk.Window(title="Hello World")
-  window.show()
-  window.connect("destroy", Gtk.main_quit)
-  Gtk.main()
+  import wx
+  app = wx.App()
+  api = wxBuildTwitterApi()
+  frm = wx.Frame(None, title='Twitter to CMS')
+  frm.Show()
+  app.MainLoop()
