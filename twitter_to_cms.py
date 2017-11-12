@@ -204,7 +204,7 @@ def createTweetDoc(api, tweetId):
       )
 
 
-if __name__ == '__main__':
+def old_main():
   import sys
   from get_access_token import get_access_token
 
@@ -223,3 +223,14 @@ if __name__ == '__main__':
 
   sys.stdout.write(doc.encode('utf8'))
   print()
+
+
+if __name__ == '__main__':
+  import gi
+  gi.require_version("Gtk", "3.0")
+  from gi.repository import Gtk
+
+  window = Gtk.Window(title="Hello World")
+  window.show()
+  window.connect("destroy", Gtk.main_quit)
+  Gtk.main()
