@@ -201,6 +201,8 @@ def wxBuildTwitterApi():
       consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX',
       parent=None,
       title='Twitter to CMS: twitter authorization')
+  if keys is None:
+    return None
   return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
 
 
@@ -241,9 +243,13 @@ def old_main():
 
 
 if __name__ == '__main__':
+  import sys
   import wx
+
   app = wx.App()
   api = wxBuildTwitterApi()
+  if api is None:
+    sys.exit(1) # User canceled authentication
   frm = wx.Frame(None, title='Twitter to CMS')
   frm.Show()
   app.MainLoop()

@@ -1,18 +1,3 @@
-#!/usr/bin/env python
-#
-# Copyright 2007-2013 The Python-Twitter Developers
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from __future__ import print_function
 
 from requests_oauthlib import OAuth1Session
@@ -61,7 +46,16 @@ class NotEmptyTextValidator(wx.PyValidator):
 
 
 class WxAccessTokenDialog(wx.Dialog):
+    """ Dialog that has a button to open a browser to a given URL and accept a pincode.
+    """
+
     def __init__(self, url, *args, **kwargs):
+        """ Constructor.
+
+            url: URL to which the browser is to open, to get granted access.
+                 When access is granted, the webpage is to display a pincode
+                 that the user can copy into the pincode field.
+        """
         super(WxAccessTokenDialog, self).__init__(*args,
             style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL,
             **kwargs)
@@ -69,7 +63,7 @@ class WxAccessTokenDialog(wx.Dialog):
 
         pincodeField = wx.StaticBox(self, wx.ID_ANY, 'Pincode')
         pincodeFieldSizer = wx.StaticBoxSizer(pincodeField, wx.VERTICAL)
-        self.pincodeTextCtrl_ = wx.TextCtrl(pincodeField, validator=NotEmptyTextValidator(), name='Pincode')
+        self.pincodeTextCtrl_ = wx.TextCtrl(pincodeField, validator=NotEmptyTextValidator(), name='Pincode', style=wx.TE_CENTRE)
         pincodeFieldText = wx.StaticText(pincodeField,
             label='Once you grant access, twitter will display a pincode. '
                   'Please enter the pincode here.')
@@ -93,15 +87,25 @@ class WxAccessTokenDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.onGrantAccess_, id=1)
 
     def onGrantAccess_(self, event):
+        """ Button event that opens the URL.
+        """
         webbrowser.open(self.url)
 
     def getPin_(self):
+        """ Property accessor that retrieves the pincode, that the user has entered.
+        """
         return self.pincodeTextCtrl_.GetValue()
 
     pin = property(getPin_)
 
 
 def wxGetAccessToken(consumer_key, consumer_secret, *args, **kwargs):
+    """ Perform OAuth authentication against the twitter API.
+        This function uses a modal dialog to get the user to enter a pincode.
+
+        Returns a dictionary of access tokens on success.
+        If the user cancels the operation, None is returned.
+    """
     oauth_client = OAuth1Session(consumer_key, client_secret=consumer_secret, callback_uri='oob')
     try:
         # Request temp token from twitter.
@@ -132,52 +136,3 @@ def wxGetAccessToken(consumer_key, consumer_secret, *args, **kwargs):
              'access_token_key': '{0}'.format(resp.get('oauth_token')),
              'access_token_secret': '{0}'.format(resp.get('oauth_token_secret'))
            }
-
-
-def get_access_token(consumer_key, consumer_secret):
-    oauth_client = OAuth1Session(consumer_key, client_secret=consumer_secret, callback_uri='oob')
-
-    print('\nRequesting temp token from Twitter...\n')
-
-    try:
-        resp = oauth_client.fetch_request_token(REQUEST_TOKEN_URL)
-    except ValueError as e:
-        raise 'Invalid response from Twitter requesting temp token: {0}'.format(e)
-
-    url = oauth_client.authorization_url(AUTHORIZATION_URL)
-
-    print('I will try to start a browser to visit the following Twitter page '
-          'if a browser will not start, copy the URL to your browser '
-          'and retrieve the pincode to be used '
-          'in the next step to obtaining an Authentication Token: \n'
-          '\n\t{0}'.format(url))
-
-    webbrowser.open(url)
-    pincode = raw_input('\nEnter your pincode? ')
-
-    print('\nGenerating and signing request for an access token...\n')
-
-    oauth_client = OAuth1Session(consumer_key, client_secret=consumer_secret,
-                                 resource_owner_key=resp.get('oauth_token'),
-                                 resource_owner_secret=resp.get('oauth_token_secret'),
-                                 verifier=pincode)
-    try:
-        resp = oauth_client.fetch_access_token(ACCESS_TOKEN_URL)
-    except ValueError as e:
-        raise BadAccess('Invalid response from Twitter requesting temp token: {0}'.format(e))
-
-    return { 'consumer_key': consumer_key,
-             'consumer_secret': consumer_secret,
-             'access_token_key': '{0}'.format(resp.get('oauth_token')),
-             'access_token_secret': '{0}'.format(resp.get('oauth_token_secret'))
-           }
-
-
-def main():
-    consumer_key = raw_input('Enter your consumer key: ')
-    consumer_secret = raw_input('Enter your consumer secret: ')
-    print(get_access_token(consumer_key, consumer_secret))
-
-
-if __name__ == "__main__":
-    main()
