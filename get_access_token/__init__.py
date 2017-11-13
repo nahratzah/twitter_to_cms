@@ -19,11 +19,11 @@ class BadAccess(BaseException):
         return self.msg
 
 
-class NotEmptyTextValidator(wx.PyValidator):
+class NotEmptyTextValidator(wx.Validator):
     """ This validator rejects an empty string, and accepts all others.
     """
     def __init__(self):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
 
     def Clone(self):
         return NotEmptyTextValidator()
