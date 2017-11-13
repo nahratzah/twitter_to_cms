@@ -258,11 +258,12 @@ def old_main():
 if __name__ == '__main__':
   import sys
   import wx
+  import screens
 
   app = wx.App()
   api = wxBuildTwitterApi()
   if api is None:
     sys.exit(1) # User canceled authentication
-  frm = wx.Frame(None, title='Twitter to CMS')
+  frm = screens.ThreadScreen(None, api=api, title='Twitter to CMS')
   frm.Show()
   app.MainLoop()
