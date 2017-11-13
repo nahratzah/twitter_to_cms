@@ -178,18 +178,6 @@ def formatTextTweet(tweet, tweetClass=u'tweet', **kw):
   return u'<div class="{1}"><a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a><span class="tweetText">{2}</span>{3}</div>'.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
 
 
-def buildTwitterApi():
-  """ Create the twitter API.
-      Handles acquiring authentication token.
-  """
-  from get_access_token import get_access_token
-
-  keys = get_access_token(
-      consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
-      consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX')
-  return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
-
-
 def wxBuildTwitterApi():
   """ Create the twitter API.
       Handles acquiring authentication token.
@@ -231,7 +219,7 @@ def old_main():
     print('Please invoke as: %s tweet_id' % (sys.argv[0],))
     sys.exit(1)
 
-  api = buildTwitterApi()
+  api = wxBuildTwitterApi()
   try:
     doc = createTweetDoc(api, last_tweet)
   except LookupError as e:
