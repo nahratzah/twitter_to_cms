@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # BSD 2-Clause License
 #
 # Copyright (c) 2017, Ariane van der Steldt
@@ -26,6 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import print_function
+from thread import ThreadDoc
 import wx
 
 
