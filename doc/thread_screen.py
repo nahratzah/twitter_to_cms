@@ -95,7 +95,7 @@ class ThreadScreen(wx.Frame):
         mainBox.AddStretchSpacer()
         mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
         mainBox.AddStretchSpacer()
-        mainBox.Add(logBox, proportion=1, flag=wx.EXPAND)
+        mainBox.Add(logBox, proportion=5, flag=wx.EXPAND)
         self.SetSizer(mainBox)
 
         self.Bind(wx.EVT_BUTTON, self.onDownload_, id=1)
