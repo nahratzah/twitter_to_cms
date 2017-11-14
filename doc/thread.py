@@ -206,7 +206,9 @@ class ThreadDoc:
     def __init__(self, api, tweetId):
         self.chain = loadChain(api, tweetId)
 
-    def __str__(self):
-        return (u'<!-- Created at: {0.created_at} -->\n\n'.format(chain[0])
-            + u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in chain)
+    def unicode(self):
+        if len(self.chain) == 0:
+            return '<!-- No data. -->'
+        return (u'<!-- Created at: {0.created_at} -->\n\n'.format(self.chain[0])
+            + u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in self.chain)
             )
