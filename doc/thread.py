@@ -44,22 +44,28 @@ def htmlEscape(s, quoted=False):
     return s
 
 
-def loadChain(api, tweet_id):
+def loadChain(api, tweet_id, print_fn=None):
     """ Download a tweet thread.
 
         api: a twitter API instance
         tweet_id: a tweet ID
+        print_fn: a print function that accepts log messages
     """
+    if print_fn is None:
+        def print_fn_impl_(*args, **kwargs):
+            print(*args, **kwargs)
+        print_fn = print_fn_impl_
+
     result = list()
     try:
         while True:
-            print(u'Downloading {}...'.format(tweet_id))
+            print_fn(u'Downloading {}...'.format(tweet_id))
             tweet = api.GetStatus(tweet_id)
             result.append(tweet)
             tweet_id = tweet.AsDict()['in_reply_to_status_id']
     except twitter.error.TwitterError as e:
-        print(u'Warning, parent tweet {0} does not exist'.format(tweet_id))
-        print(e)
+        print_fn(u'Warning, parent tweet {0} does not exist'.format(tweet_id))
+        print_fn(e)
     except KeyError:
         pass # No more tweets
     result.reverse()
@@ -203,8 +209,8 @@ def formatTextTweet(tweet, tweetClass=u'tweet', **kw):
 
 
 class ThreadDoc:
-    def __init__(self, api, tweetId):
-        self.chain = loadChain(api, tweetId)
+    def __init__(self, api, tweetId, *args, **kwargs):
+        self.chain = loadChain(api, tweetId, *args, **kwargs)
 
     def unicode(self):
         if len(self.chain) == 0:

@@ -82,5 +82,9 @@ class ThreadScreen(wx.Frame):
 
 
     def onDownload_(self, event):
-        self.doc_ = ThreadDoc(self.api_, self.tweetIdCtrl_.GetValue())
+        self.doc_ = ThreadDoc(self.api_, self.tweetIdCtrl_.GetValue(), print_fn=lambda x: self.appendLog_(x))
         self.outputHtml_.SetValue(self.doc_.unicode())
+
+    def appendLog_(self, *args):
+        for a in args:
+            self.log_.AppendText(u'{0}\n'.format(a))
