@@ -27,6 +27,25 @@
 from __future__ import print_function
 from thread import ThreadDoc
 import wx
+import wx.lib.newevent
+import threading
+
+
+LogEvent, EVT_LOG_EVENT = wx.lib.newevent.NewEvent() # Event for log messages
+DocEvent, EVT_DOC_EVENT = wx.lib.newevent.NewEvent() # Event for document download completion
+
+
+class DocDownloadThread(threading.Thread):
+    def __init__(self, api, tweetId, onComplete, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.api = api
+        self.tweetId = tweetId
+        self.onComplete = onComplete
+        self.args = args
+        self.kwargs = kwargs
+
+    def run(self):
+        self.onComplete(ThreadDoc(self.api, self.tweetId, *self.args, **self.kwargs), thread=self)
 
 
 class ThreadScreen(wx.Frame):
@@ -37,6 +56,7 @@ class ThreadScreen(wx.Frame):
         self.api_ = kwargs['api']
         del kwargs['api']
         wx.Frame.__init__(self, *args, **kwargs)
+        self.doc_ = None
 
         # Labeled box, with layout:
         #
@@ -79,12 +99,26 @@ class ThreadScreen(wx.Frame):
         self.SetSizer(mainBox)
 
         self.Bind(wx.EVT_BUTTON, self.onDownload_, id=1)
-
+        self.Bind(EVT_LOG_EVENT, self.onLogEvent_)
+        self.Bind(EVT_DOC_EVENT, self.onDocEvent_)
 
     def onDownload_(self, event):
-        self.doc_ = ThreadDoc(self.api_, self.tweetIdCtrl_.GetValue(), print_fn=lambda x: self.appendLog_(x))
+        thr = DocDownloadThread(
+            self.api_,
+            self.tweetIdCtrl_.GetValue(),
+            lambda doc,thread: wx.PostEvent(self, DocEvent(doc=doc, thread=thread)),
+            print_fn=lambda x: self.appendLog(x))
+        thr.start()
+        self.Disable()
+
+    def onDocEvent_(self, event):
+        event.thread.join()
+        self.Enable()
+        self.doc_ = event.doc
         self.outputHtml_.SetValue(self.doc_.unicode())
 
-    def appendLog_(self, *args):
-        for a in args:
-            self.log_.AppendText(u'{0}\n'.format(a))
+    def onLogEvent_(self, event):
+        self.log_.AppendText(u'{0}\n'.format(event.msg))
+
+    def appendLog(self, msg):
+        wx.PostEvent(self, LogEvent(msg=msg))
