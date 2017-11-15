@@ -116,7 +116,7 @@ class ThreadScreen(wx.Frame):
         self.Enable()
         self.appendLog('Download complete')
         self.doc_ = event.doc
-        self.outputHtml_.SetValue(self.doc_.unicode())
+        self.outputHtml_.SetValue(self.doc_.unicode(print_fn=lambda x:self.appendLog(x)))
 
     def onLogEvent_(self, event):
         if self.log_.GetNumberOfLines() > 0:

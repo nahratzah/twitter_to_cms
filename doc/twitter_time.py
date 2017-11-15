@@ -31,7 +31,7 @@ def twitterTimestampToDatetime(str_or_tweet):
     """
     if isinstance(str_or_tweet, twitter.Status):
         s = str_or_tweet.created_at
-    else if isinstance(str_or_tweet, str) or isinstance(str_or_tweet, unicode):
+    elif isinstance(str_or_tweet, str) or isinstance(str_or_tweet, unicode):
         s = str_or_tweet
     else:
         raise ValueError("twitterTimestampToDatetime requires a str/unicode or twitter.Status argument")
@@ -57,7 +57,7 @@ def twitterTimestampToDatetime(str_or_tweet):
         raise ValueError('Invalid timestamp')
     hour = int(time_components[0])
     minute = int(time_components[1])
-    seconds = int(time_components[2])
+    second = int(time_components[2])
 
     # components[4] = the timezone with value '+0000' -- we validate this
     if components[4] != '+0000':
@@ -66,4 +66,4 @@ def twitterTimestampToDatetime(str_or_tweet):
     # components[5] = year
     year = int(components[5])
 
-    return pytz.utc.localize(datetime(year, month, day, hour, minute, second))
+    return pytz.utc.localize(datetime.datetime(year, month, day, hour, minute, second))

@@ -26,6 +26,8 @@
 from __future__ import print_function
 import twitter
 import re
+import tzlocal
+from twitter_time import twitterTimestampToDatetime
 
 
 def htmlEscape(s, quoted=False):
@@ -212,9 +214,22 @@ class ThreadDoc:
     def __init__(self, api, tweetId, *args, **kwargs):
         self.chain = loadChain(api, tweetId, *args, **kwargs)
 
-    def unicode(self):
+    def unicode(self, print_fn=None):
+        if print_fn is None:
+            def print_fn_impl_(*args, **kwargs):
+                print(*args, **kwargs)
+            print_fn = print_fn_impl_
+
         if len(self.chain) == 0:
-            return '<!-- No data. -->'
-        return (u'<!-- Created at: {0.created_at} -->\n\n'.format(self.chain[0])
+            print_fn(u'No data.')
+            return u'<!-- No data. -->'
+
+        created_at = twitterTimestampToDatetime(self.chain[0].created_at)
+        print_fn(u'Thread timestamp looks like {0}.'.format(created_at))
+        ltz = tzlocal.get_localzone()
+        local_created_at = ltz.normalize(created_at.astimezone(ltz))
+        print_fn(u'Local time zone looks like {0}, timestamp in localtime thus is {1}.'.format(ltz, local_created_at))
+
+        return (u'<!-- Created at: {0} -->\n\n'.format(local_created_at)
             + u'\n\n'.join(u'<!-- Tweet {0} -->\n{1}'.format(x.id_str, formatTextTweet(x)) for x in self.chain)
             )
