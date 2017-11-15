@@ -66,4 +66,4 @@ def twitterTimestampToDatetime(str_or_tweet):
     # components[5] = year
     year = int(components[5])
 
-    return datetime(year, month, day, hour, minute, second, tzinfo=pytz.utc)
+    return pytz.utc.localize(datetime(year, month, day, hour, minute, second))
