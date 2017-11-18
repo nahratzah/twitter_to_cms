@@ -207,7 +207,7 @@ def formatTextTweet(tweet, tweetClass=u'tweet', **kw):
         tweet: a tweet to convert to a HTML block.
     """
     media = renderMedia(tweet)
-    return u'<div class="{1}"><a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a><span class="tweetText">{2}</span>{3}</div>'.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
+    return u'<div class="{1}"><a class="tweetOriginal" href="https://twitter.com/{0.user.screen_name}/status/{0.id_str}">Original Tweet</a><div class="tweetText">{2}</div>{3}</div>'.format(tweet, tweetClass, tweetTextToHtml(tweet, **kw), media or '')
 
 
 class ThreadDoc:
