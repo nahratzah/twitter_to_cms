@@ -181,6 +181,17 @@ def removeRetweetLink(tweet, txt):
     return txt
 
 
+def applyParagraphs(tweet, txt):
+    """ Apply <p> html tags to the text, to create paragraphs.
+    """
+    txt = re.sub(
+        u'\n\n+',
+        '</p>\n\n<p>',
+        txt.strip(u'\n'),
+        flags=re.IGNORECASE)
+    return ur'<p>{0}</p>'.format(txt)
+
+
 def tweetTextToHtml(tweet, nestRetweets=True):
     """ Convert contents of a tweet to HTML.
         The returned text contains a mix of text and HTML.
@@ -192,10 +203,18 @@ def tweetTextToHtml(tweet, nestRetweets=True):
     txt = applyMentions(tweet, txt)
     txt = applyHashTags(tweet, txt)
     if nestRetweets:
-        txt = applyRetweet(tweet, txt)
         txt = removeRetweetLink(tweet, txt)
     txt = removeMediaLinks(tweet, txt)
+
+    # Apply paragraphs *after* media/retweet links have been erased.
+    # Otherwise, we'll get empty paragraphs.
+    txt = applyParagraphs(tweet, txt)
+
+    # Apply retweets late after paragraphs, to prevent nesing <p> tags.
+    if nestRetweets:
+        txt = applyRetweet(tweet, txt)
     txt = applyLinks(tweet, txt)
+
     return txt;
 
 
