@@ -114,9 +114,15 @@ class ThreadScreen(wx.Frame):
     def onDocEvent_(self, event):
         event.thread.join()
         self.Enable()
-        self.appendLog('Download complete')
-        self.doc_ = event.doc
-        self.outputHtml_.SetValue(self.doc_.unicode(print_fn=lambda x:self.appendLog(x)))
+        try:
+            self.appendLog('Download complete')
+            self.doc_ = event.doc
+            self.outputHtml_.SetValue(self.doc_.unicode(print_fn=lambda x:self.appendLog(x)))
+        except StandardError as e:
+            import traceback
+
+            self.appendLog(u'Exception while trying to process document: {0}'.format(e))
+            self.appendLog(traceback.format_exc())
 
     def onLogEvent_(self, event):
         if self.log_.GetNumberOfLines() > 0:
