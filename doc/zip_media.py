@@ -74,6 +74,6 @@ class TwitterMediaZipFile(zipfile.ZipFile):
 
         for url, fname in url_name_map.iteritems():
             print_fn('Downloading {1} from {0}...'.format(url, fname))
-            with urllib2.urlopen(url) as data:
-                self.writestr(fname, data.read())
+            data = urllib2.urlopen(url)
+            self.writestr(fname, data.read())
         return url_name_map
