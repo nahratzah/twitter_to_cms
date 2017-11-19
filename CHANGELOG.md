@@ -1,5 +1,9 @@
 # Upcoming Release
 
+# v0.2
+
+Released: Sun, Nov 19, 2017
+
 Bug fixes:
 - If the document conversion fails due to an exception, log the exception and a stack trace.
 
@@ -13,11 +17,11 @@ Features:
 
 # v0.1
 
-Released: Tue Nov 15
+Released: Wed, Nov 15, 2017
 
 Bug fixes:
 - display time zone in local time.
 
 # v0.0
 
-Released: Tue Nov 14
+Released: Tue, Nov 14, 2017
