@@ -1,5 +1,8 @@
 # Upcoming Release
 
+Features:
+- Added checkbox that will allow remembering access. (Uses keychain module to store password.)
+
 # v0.2
 
 Released: Sun, Nov 19, 2017
