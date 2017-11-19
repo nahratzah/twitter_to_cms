@@ -28,20 +28,20 @@ from __future__ import print_function
 
 
 def wxBuildTwitterApi():
-  """ Create the twitter API.
-      Handles acquiring authentication token.
-  """
-  from get_access_token import wxGetAccessToken
-  import twitter
+    """ Create the twitter API.
+        Handles acquiring authentication token.
+    """
+    from get_access_token import wxGetAccessToken
+    import twitter
 
-  keys = wxGetAccessToken(
-      consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
-      consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX',
-      parent=None,
-      title='Twitter to CMS: twitter authorization')
-  if keys is None:
-      return None
-  return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
+    keys = wxGetAccessToken(
+        consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
+        consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX',
+        parent=None,
+        title='Twitter to CMS: twitter authorization')
+    if keys is None:
+        return None
+    return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
 
 
 if __name__ == '__main__':
