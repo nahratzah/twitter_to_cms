@@ -26,6 +26,7 @@
 
 from __future__ import print_function
 from thread import ThreadDoc
+from zip_media import TwitterMediaZipFile
 import wx
 import wx.lib.newevent
 import threading
@@ -58,6 +59,9 @@ class ThreadScreen(wx.Frame):
         wx.Frame.__init__(self, *args, **kwargs)
         self.doc_ = None
 
+        # Main layout, vertical
+        mainBox = wx.BoxSizer(wx.VERTICAL)
+
         # Labeled box, with layout:
         #
         # 'Text describing purpose of the box'
@@ -78,9 +82,17 @@ class ThreadScreen(wx.Frame):
             wx.Button(tweetBox.GetStaticBox(), id=1, label='Download'),
             flag=wx.ALIGN_RIGHT)
         tweetBox.Add(tweetBoxInputs, flag=wx.EXPAND)
+        # Add tweetBox to main layout
+        mainBox.Add(tweetBox, flag=wx.EXPAND)
+        mainBox.AddStretchSpacer()
 
         # Text field for output HTML
         self.outputHtml_ = wx.TextCtrl(self, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
+        mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
+
+        # Add button to download images
+        mainBox.Add(wx.Button(self, id=2, label='Download Images'), flag=wx.ALIGN_RIGHT)
+        mainBox.AddStretchSpacer()
 
         # Text field for log
         # Labeled box, with layout:
@@ -89,16 +101,13 @@ class ThreadScreen(wx.Frame):
         logBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
         self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY)
         logBox.Add(self.log_, proportion=1, flag=wx.EXPAND)
-
-        mainBox = wx.BoxSizer(wx.VERTICAL)
-        mainBox.Add(tweetBox, flag=wx.EXPAND)
-        mainBox.AddStretchSpacer()
-        mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
-        mainBox.AddStretchSpacer()
+        # Add logBox to main layout
         mainBox.Add(logBox, proportion=5, flag=wx.EXPAND)
+
         self.SetSizer(mainBox)
 
         self.Bind(wx.EVT_BUTTON, self.onDownload_, id=1)
+        self.Bind(wx.EVT_BUTTON, self.onDownloadImages_, id=2)
         self.Bind(EVT_LOG_EVENT, self.onLogEvent_)
         self.Bind(EVT_DOC_EVENT, self.onDocEvent_)
 
@@ -128,6 +137,28 @@ class ThreadScreen(wx.Frame):
         if self.log_.GetNumberOfLines() > 0:
             self.log_.AppendText(u'\n')
         self.log_.AppendText(u'{0}'.format(event.msg))
+
+    def onDownloadImages_(self, event):
+        with wx.FileDialog(
+                self,
+                'Save media files to Zip Archive',
+                wildcard='Zip files (*.zip)|*.zip',
+                style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT) as dialog:
+            if dialog.ShowModal() == 'wx.ID_CANCEL':
+                return
+            filename = dialog.GetPath()
+        self.Disable()
+        try:
+            self.appendLog('Creating {0}'.format(filename))
+            with TwitterMediaZipFile(filename) as archive:
+                for tweet in self.doc_.chain:
+                    archive.addTweetMedia(tweet, print_fn=lambda x:self.appendLog(x))
+        except StandardError as e:
+            import traceback
+
+            self.appendLog(u'Exception while trying to create zip file: {0}'.format(e))
+            self.appendLog(traceback.format_exc())
+        self.Enable()
 
     def appendLog(self, msg):
         wx.PostEvent(self, LogEvent(msg=msg))
