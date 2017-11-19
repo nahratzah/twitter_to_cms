@@ -27,21 +27,80 @@
 from __future__ import print_function
 
 
-def wxBuildTwitterApi():
+# Keyring constants.
+# The system is the subsystem of this application.
+# Since the twitter authentication uses opaque keys, we "fake" a username.
+# All keys are in the password field.
+KEYRING_SYSTEM_NAME = u'TwitterToCms.twitter'
+KEYRING_SYSTEM_USERNAME = u'twitter'
+
+
+def getKeyringAccessToken(consumer_key, consumer_secret):
+    import keyring
+
+    password = keyring.get_password(KEYRING_SYSTEM_NAME, KEYRING_SYSTEM_USERNAME)
+    if password is None:
+        return None
+    try:
+        (access_token_key, access_token_secret) = password.split('\n')
+        return { 'consumer_key': consumer_key,
+                 'consumer_secret': consumer_secret,
+                 'access_token_key': access_token_key,
+                 'access_token_secret': access_token_secret
+               }
+    except StandardError:
+        return None
+
+
+def setKeyringAccessToken(access_token_key, access_token_secret, **ignored):
+    import keyring
+
+    password = '\n'.join([access_token_key, access_token_secret])
+    keyring.set_password(KEYRING_SYSTEM_NAME, KEYRING_SYSTEM_USERNAME, password)
+
+
+def wxBuildTwitterApi(consumer_key, consumer_secret):
     """ Create the twitter API.
         Handles acquiring authentication token.
     """
     from get_access_token import wxGetAccessToken
-    import twitter
 
-    keys = wxGetAccessToken(
-        consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt',
-        consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX',
+    return wxGetAccessToken(
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret,
         parent=None,
         title='Twitter to CMS: twitter authorization')
-    if keys is None:
-        return None
-    return twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
+
+
+def buildTwitterApi():
+    import twitter
+
+    methods = [ getKeyringAccessToken, wxBuildTwitterApi ]
+    consumer_key='KGDRrUHmEJYKWSo5pIDsiVpFt'
+    consumer_secret='10FXCOswIKE6Lr5mJwvifcJQ1dyACT2jYAuFppsBkg9H9JypGX'
+
+    for method in methods:
+        # Try to acquire keys using method.
+        keys = method(consumer_key=consumer_key, consumer_secret=consumer_secret)
+        if keys is not None:
+            # If key store is present, take it out of the keys
+            try:
+                store = keys['store']
+                del keys['store']
+            except KeyError:
+                store = False
+
+            # Use keys to create API
+            api = twitter.Api(tweet_mode='extended', sleep_on_rate_limit=True, **keys)
+            # Verify keys are valid
+            verify = api.VerifyCredentials()
+            if verify is not None:
+                # Valid API instance
+                if store:
+                    setKeyringAccessToken(**keys)
+                return api
+    # Give up
+    return None
 
 
 if __name__ == '__main__':
@@ -50,7 +109,7 @@ if __name__ == '__main__':
     import doc
 
     app = wx.App()
-    api = wxBuildTwitterApi()
+    api = buildTwitterApi()
     if api is None:
         sys.exit(1) # User canceled authentication
     frm = doc.ThreadScreen(None, api=api, title='Twitter to CMS')
