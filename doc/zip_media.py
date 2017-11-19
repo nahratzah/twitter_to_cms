@@ -67,7 +67,7 @@ class TwitterMediaZipFile(zipfile.ZipFile):
             elif media.type == 'animated_gif':
                 urls.append(media.media_url_https)
                 for variant in media.video_info['variants']:
-                    urls.append(variant.url)
+                    urls.append(variant['url'])
 
         url_name_map = dict()
         url_name_map = { url: filenameForUrl(url, subdir=subdir) for url in urls }
