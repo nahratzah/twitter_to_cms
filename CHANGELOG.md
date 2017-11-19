@@ -7,10 +7,16 @@ Changes:
 - Change ``<span>`` tags to ``<div>`` tags.
 - Add ``<p>`` (paragraph) tags around paragraphs in a tweet.
 
+Features:
+- Add support for animated gifs.
+- Add ability to download media files into a ZIP archive.
+
 # v0.1
 
+Released: Tue Nov 15
+
 Bug fixes:
-- display time zone in local time
+- display time zone in local time.
 
 # v0.0
 
