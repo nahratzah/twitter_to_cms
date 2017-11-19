@@ -34,6 +34,7 @@ import threading
 
 LogEvent, EVT_LOG_EVENT = wx.lib.newevent.NewEvent() # Event for log messages
 DocEvent, EVT_DOC_EVENT = wx.lib.newevent.NewEvent() # Event for document download completion
+DownloadMediaEvent, EVT_DOWNLOAD_MEDIA_EVENT = wx.lib.newevent.NewEvent() # Event for document download completion
 
 
 class DocDownloadThread(threading.Thread):
@@ -47,6 +48,32 @@ class DocDownloadThread(threading.Thread):
 
     def run(self):
         self.onComplete(ThreadDoc(self.api, self.tweetId, *self.args, **self.kwargs), thread=self)
+
+
+class DownloadMediaThread(threading.Thread):
+    def __init__(self, filename, tweetList, onComplete, **kwargs):
+        threading.Thread.__init__(self)
+        self.filename = filename
+        self.tweetList = tweetList
+        self.onComplete = onComplete
+        self.kwargs = kwargs
+
+    def run(self):
+        try:
+            print_fn = self.kwargs['print_fn']
+        except KeyError:
+            print_fn = print
+
+        try:
+            print_fn('Creating {0}'.format(self.filename))
+            with TwitterMediaZipFile(self.filename) as archive:
+                for tweet in self.tweetList:
+                    archive.addTweetMedia(tweet, **self.kwargs)
+        except StandardError as e:
+            import traceback
+
+            print_fn(u'Exception while trying to create zip file: {0}\n{1}'.format(e, traceback.format_exc()))
+        self.onComplete(thread=self)
 
 
 class ThreadScreen(wx.Frame):
@@ -91,7 +118,9 @@ class ThreadScreen(wx.Frame):
         mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
 
         # Add button to download images
-        mainBox.Add(wx.Button(self, id=2, label='Download Images'), flag=wx.ALIGN_RIGHT)
+        self.downloadMediaBtn_ = wx.Button(self, id=2, label='Download Media Files')
+        mainBox.Add(self.downloadMediaBtn_, flag=wx.ALIGN_RIGHT)
+        self.downloadMediaBtn_.Disable() # Initially disabled, enabled after doc download.
         mainBox.AddStretchSpacer()
 
         # Text field for log
@@ -107,9 +136,10 @@ class ThreadScreen(wx.Frame):
         self.SetSizer(mainBox)
 
         self.Bind(wx.EVT_BUTTON, self.onDownload_, id=1)
-        self.Bind(wx.EVT_BUTTON, self.onDownloadImages_, id=2)
+        self.Bind(wx.EVT_BUTTON, self.onDownloadMedia_, id=2)
         self.Bind(EVT_LOG_EVENT, self.onLogEvent_)
         self.Bind(EVT_DOC_EVENT, self.onDocEvent_)
+        self.Bind(EVT_DOWNLOAD_MEDIA_EVENT, self.onDownloadMediaEvent_)
 
     def onDownload_(self, event):
         thr = DocDownloadThread(
@@ -123,6 +153,7 @@ class ThreadScreen(wx.Frame):
     def onDocEvent_(self, event):
         event.thread.join()
         self.Enable()
+        self.downloadMediaBtn_.Enable()
         try:
             self.appendLog('Download complete')
             self.doc_ = event.doc
@@ -138,7 +169,7 @@ class ThreadScreen(wx.Frame):
             self.log_.AppendText(u'\n')
         self.log_.AppendText(u'{0}'.format(event.msg))
 
-    def onDownloadImages_(self, event):
+    def onDownloadMedia_(self, event):
         with wx.FileDialog(
                 self,
                 'Save media files to Zip Archive',
@@ -147,18 +178,18 @@ class ThreadScreen(wx.Frame):
             if dialog.ShowModal() == 'wx.ID_CANCEL':
                 return
             filename = dialog.GetPath()
-        self.Disable()
-        try:
-            self.appendLog('Creating {0}'.format(filename))
-            with TwitterMediaZipFile(filename) as archive:
-                for tweet in self.doc_.chain:
-                    archive.addTweetMedia(tweet, print_fn=lambda x:self.appendLog(x))
-        except StandardError as e:
-            import traceback
 
-            self.appendLog(u'Exception while trying to create zip file: {0}'.format(e))
-            self.appendLog(traceback.format_exc())
-        self.Enable()
+        thr = DownloadMediaThread(
+            filename,
+            self.doc_.chain,
+            lambda thread: wx.PostEvent(self, DownloadMediaEvent(thread=thread)),
+            print_fn=lambda x: self.appendLog(x))
+        thr.start()
+        self.downloadMediaBtn_.Disable()
+
+    def onDownloadMediaEvent_(self, event):
+        event.thread.join()
+        self.downloadMediaBtn_.Enable()
 
     def appendLog(self, msg):
         wx.PostEvent(self, LogEvent(msg=msg))
