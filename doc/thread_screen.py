@@ -28,6 +28,7 @@ from __future__ import print_function
 from thread import ThreadDoc
 from zip_media import TwitterMediaZipFile
 import wx
+import wx.html
 import wx.lib.newevent
 import threading
 
@@ -113,9 +114,14 @@ class ThreadScreen(wx.Frame):
         mainBox.Add(tweetBox, flag=wx.EXPAND)
         mainBox.AddStretchSpacer()
 
-        # Text field for output HTML
-        self.outputHtml_ = wx.TextCtrl(self, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
-        mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
+        # Text field and browser preview for output HTML
+        htmlBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.outputHtml_ = wx.TextCtrl(self, id=3, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
+        htmlBox.Add(self.outputHtml_, proportion=1, flag=wx.EXPAND)
+        self.htmlPreview_ = wx.html.HtmlWindow(self)
+        htmlBox.Add(self.htmlPreview_, proportion=1, flag=wx.EXPAND)
+        # Add htmlBox to main layout
+        mainBox.Add(htmlBox, proportion=20, flag=wx.EXPAND)
 
         # Add button to download images
         self.downloadMediaBtn_ = wx.Button(self, id=2, label='Download Media Files')
@@ -140,6 +146,10 @@ class ThreadScreen(wx.Frame):
         self.Bind(EVT_LOG_EVENT, self.onLogEvent_)
         self.Bind(EVT_DOC_EVENT, self.onDocEvent_)
         self.Bind(EVT_DOWNLOAD_MEDIA_EVENT, self.onDownloadMediaEvent_)
+        self.Bind(wx.EVT_TEXT, self.updateHtmlPreview_, id=3)
+
+    def updateHtmlPreview_(self, event):
+        self.htmlPreview_.SetPage(self.outputHtml_.GetValue())
 
     def onDownload_(self, event):
         thr = DocDownloadThread(
