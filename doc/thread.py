@@ -74,6 +74,41 @@ def loadChain(api, tweet_id, print_fn=None):
     return result
 
 
+def renderMediaPhotos(tweet):
+    """ Returns a div with images, based on the tweet media.
+        Returns None if the tweet has no image media.
+
+        tweet: a tweet from which to extract media.
+    """
+    media_images = [x for x in tweet.media if x.type == 'photo']
+    if len(media_images) == 0:
+        return None
+    images = [
+        u'<img class="tweetImage {0.type}" src="{0.media_url_https}" alt="{1}" />'.format(img, htmlEscape(img.ext_alt_text, True))
+        for img in media_images
+        ]
+    return u'<div class="tweetMedia tweetMediaPhoto tweetMediaCount{1}">{0}</div>'.format(u''.join(images), len(images))
+
+
+def renderMediaAnimatedGif(tweet):
+    """ Returns a div with a HTML5 video, based on the tweet media.
+        Returns None if the tweet has no animated gif media.
+
+        tweet: a tweet from which to extract media.
+    """
+    media_gifs = [x for x in tweet.media if x.type == 'animated_gif']
+    if len(media_gifs) == 0:
+        return None
+    template = (u'<video class="tweetGif {0.type}" controls poster="{0.media_url_https}">'
+        + u'<source type="{1[content_type]}" src="{1[url]}" />'
+        + u'</video>')
+    gifs = [
+        template.format(img, img.video_info['variants'][0])
+        for img in media_gifs
+        ]
+    return u'<div class="tweetMedia tweetMediaGif tweetMediaCount{1}">{0}</div>'.format(u''.join(gifs), len(gifs))
+
+
 def renderMedia(tweet):
     """ Returns a div with images, based on the tweet media.
         Returns None if the tweet has no media.
@@ -82,12 +117,8 @@ def renderMedia(tweet):
     """
     if tweet.media is None or len(tweet.media) == 0:
         return None
-    images = [
-        u'<img class="tweetImage {0.type}" src="{0.media_url_https}" alt="{1}" />'.format(img, htmlEscape(img.ext_alt_text, True))
-        for img in tweet.media
-        ]
-    imageCount = len(images)
-    return u'<div class="tweetMedia tweetMediaCount{1}">{0}</div>'.format(u''.join(images), imageCount)
+    return ((renderMediaPhotos(tweet) or u'')
+        + (renderMediaAnimatedGif(tweet) or u''))
 
 
 def removeMediaLinks(tweet, txt):
