@@ -28,6 +28,7 @@ from __future__ import print_function
 import thread
 import zipfile
 import re
+import urllib2
 import os.path
 
 
