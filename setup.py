@@ -2,7 +2,9 @@ from setuptools import setup
 
 APP = ['twitter_to_cms.py']
 DATA_FILES = []
-PACKAGES = ['certifi']
+PACKAGES = ['certifi',
+            'keyring.backends'
+           ]
 OPTIONS = {'argv_emulation': True,
            'site_packages': True,
            'packages': PACKAGES,
