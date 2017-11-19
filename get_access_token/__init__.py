@@ -89,11 +89,13 @@ class WxAccessTokenDialog(wx.Dialog):
         pincodeField = wx.StaticBox(self, wx.ID_ANY, 'Pincode')
         pincodeFieldSizer = wx.StaticBoxSizer(pincodeField, wx.VERTICAL)
         self.pincodeTextCtrl_ = wx.TextCtrl(pincodeField, validator=NotEmptyTextValidator(), name='Pincode', style=wx.TE_CENTRE)
+        self.storeCtrl_ = wx.CheckBox(pincodeField, label='Remember Credentials', style=wx.CHK_2STATE)
         pincodeFieldText = wx.StaticText(pincodeField,
             label='Once you grant access, twitter will display a pincode. '
                   'Please enter the pincode here.')
         pincodeFieldSizer.Add(pincodeFieldText, proportion=10, flag=wx.ALIGN_LEFT|wx.TOP)
         pincodeFieldSizer.Add(self.pincodeTextCtrl_, proportion=10, flag=wx.EXPAND|wx.CENTER)
+        pincodeFieldSizer.Add(self.storeCtrl_, proportion=10, flag=wx.EXPAND|wx.CENTER)
 
         text = wx.StaticText(self,
             label='In order to read tweets, I need to be given access. '
@@ -121,7 +123,13 @@ class WxAccessTokenDialog(wx.Dialog):
         """
         return self.pincodeTextCtrl_.GetValue()
 
+    def getStore_(self):
+        """ Property accessor that retrieves the store checkbox value.
+        """
+        return self.storeCtrl_.IsChecked()
+
     pin = property(getPin_)
+    store = property(getStore_)
 
 
 def wxGetAccessToken(consumer_key, consumer_secret, *args, **kwargs):
@@ -143,6 +151,7 @@ def wxGetAccessToken(consumer_key, consumer_secret, *args, **kwargs):
     with WxAccessTokenDialog(url, *args, **kwargs) as dialog:
         if dialog.ShowModal() == wx.ID_OK:
             pincode = dialog.pin
+            store = dialog.store
         else:
             return None
 
@@ -159,5 +168,6 @@ def wxGetAccessToken(consumer_key, consumer_secret, *args, **kwargs):
     return { 'consumer_key': consumer_key,
              'consumer_secret': consumer_secret,
              'access_token_key': '{0}'.format(resp.get('oauth_token')),
-             'access_token_secret': '{0}'.format(resp.get('oauth_token_secret'))
+             'access_token_secret': '{0}'.format(resp.get('oauth_token_secret')),
+             'store': store
            }
