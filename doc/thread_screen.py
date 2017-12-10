@@ -111,17 +111,22 @@ class ThreadScreen(wx.Frame):
         tweetBox.Add(tweetBoxInputs, flag=wx.EXPAND)
         # Add tweetBox to main layout
         mainBox.Add(tweetBox, flag=wx.EXPAND)
-        mainBox.AddStretchSpacer()
+
+        # Declare the main panel box.
+        mainPanel = wx.Panel(self)
+        mainPanelBox = wx.BoxSizer(wx.VERTICAL)
+        mainPanel.SetSizer(mainPanelBox)
+        mainBox.Add(mainPanel, proportion=20, flag=wx.EXPAND)
 
         # Text field for output HTML
-        self.outputHtml_ = wx.TextCtrl(self, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE, size=(150,450))
-        mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
+        self.outputHtml_ = wx.TextCtrl(mainPanel, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
+        mainPanelBox.Add(self.outputHtml_, proportion=1, flag=wx.EXPAND)
 
         # Add button to download images
-        self.downloadMediaBtn_ = wx.Button(self, id=2, label='Download Media Files')
-        mainBox.Add(self.downloadMediaBtn_, flag=wx.ALIGN_RIGHT)
+        self.downloadMediaBtn_ = wx.Button(mainPanel, id=2, label='Download Media Files')
+        mainPanelBox.Add(self.downloadMediaBtn_, flag=wx.ALIGN_RIGHT)
         self.downloadMediaBtn_.Disable() # Initially disabled, enabled after doc download.
-        mainBox.AddStretchSpacer()
+        # mainBox.AddStretchSpacer()
 
         # Text field for log
         # Labeled box, with layout:
