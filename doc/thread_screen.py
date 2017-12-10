@@ -135,12 +135,19 @@ class ThreadScreen(wx.Frame):
         # Labeled box, with layout:
         #
         # 'multi-line text field with log messages'
-        logBox = wx.StaticBoxSizer(wx.StaticBox(mainLogSplitter, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
+        #
+        # Due to the use of the splitter, the logBox (which is a Sizer)
+        # needs to be placed inside a panel (logPanel).
+        logPanel = wx.Panel(mainLogSplitter)
+        logPanelBox = wx.BoxSizer(wx.VERTICAL)
+        logPanel.SetSizer(logPanelBox)
+        logBox = wx.StaticBoxSizer(wx.StaticBox(logPanel, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
         self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY)
-        logBox.Add(self.log_, proportion=1, flag=wx.EXPAND)
+        logBox.Add(self.log_, proportion=1, flag=wx.EXPAND|wx.ALIGN_RIGHT|wx.ALIGN_BOTTOM)
+        logPanelBox.Add(logBox, proportion=1, flag=wx.EXPAND)
 
         # Finally, add the splitter.
-        mainLogSplitter.SplitHorizontally(mainPanel, logBox.GetStaticBox())
+        mainLogSplitter.SplitHorizontally(mainPanel, logPanel)
         mainBox.Add(mainLogSplitter, flag=wx.EXPAND, proportion=1)
 
         self.SetSizerAndFit(mainBox)
