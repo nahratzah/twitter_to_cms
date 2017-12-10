@@ -1,7 +1,10 @@
 # Upcoming Release
 
 Features:
-- Added checkbox that will allow remembering access. (Uses keychain module to store password.)
+- Added checkbox at login, that will allow remembering access credentials. (Uses keychain module to store password.)
+
+Bug fixes:
+- Added size constraints to log and html output, to ensure they have a minimum size.
 
 # v0.2
 
