@@ -128,10 +128,10 @@ class ThreadScreen(wx.Frame):
         #
         # 'multi-line text field with log messages'
         logBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
-        self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY)
+        self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY, size=(150,150))
         logBox.Add(self.log_, proportion=1, flag=wx.EXPAND)
         # Add logBox to main layout
-        mainBox.Add(logBox, proportion=5, flag=wx.EXPAND)
+        mainBox.Add(logBox, proportion=0, flag=wx.EXPAND)
 
         self.SetSizer(mainBox)
 
