@@ -148,6 +148,7 @@ class ThreadScreen(wx.Frame):
 
         # Finally, add the splitter.
         mainLogSplitter.SplitHorizontally(mainPanel, logPanel)
+        mainLogSplitter.SetSashGravity(1.0)
         mainBox.Add(mainLogSplitter, flag=wx.EXPAND, proportion=1)
 
         self.SetSizerAndFit(mainBox)
