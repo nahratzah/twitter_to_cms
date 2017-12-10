@@ -1,4 +1,4 @@
-# Upcoming Release
+# v0.3
 
 Features:
 - Added checkbox at login, that will allow remembering access credentials. (Uses keychain module to store password.)
