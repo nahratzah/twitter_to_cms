@@ -114,7 +114,7 @@ class ThreadScreen(wx.Frame):
         mainBox.AddStretchSpacer()
 
         # Text field for output HTML
-        self.outputHtml_ = wx.TextCtrl(self, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
+        self.outputHtml_ = wx.TextCtrl(self, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE, size=(150,450))
         mainBox.Add(self.outputHtml_, proportion=20, flag=wx.EXPAND)
 
         # Add button to download images
@@ -133,7 +133,7 @@ class ThreadScreen(wx.Frame):
         # Add logBox to main layout
         mainBox.Add(logBox, proportion=0, flag=wx.EXPAND)
 
-        self.SetSizer(mainBox)
+        self.SetSizerAndFit(mainBox)
 
         self.Bind(wx.EVT_BUTTON, self.onDownload_, id=1)
         self.Bind(wx.EVT_BUTTON, self.onDownloadMedia_, id=2)
