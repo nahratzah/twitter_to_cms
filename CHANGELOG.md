@@ -4,7 +4,7 @@ Features:
 - Added checkbox at login, that will allow remembering access credentials. (Uses keychain module to store password.)
 
 Bug fixes:
-- Added size constraints to log and html output, to ensure they have a minimum size.
+- Added splitter between html output and log, to ensure they have a minimum size, but can be varied.
 
 # v0.2
 
