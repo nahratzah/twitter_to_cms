@@ -112,11 +112,14 @@ class ThreadScreen(wx.Frame):
         # Add tweetBox to main layout
         mainBox.Add(tweetBox, flag=wx.EXPAND)
 
+        # Allow main window and log window to be split.
+        mainLogSplitter = wx.SplitterWindow(self, size=(-1, 450))
+        mainLogSplitter.SetMinimumPaneSize(100)
+
         # Declare the main panel box.
-        mainPanel = wx.Panel(self)
+        mainPanel = wx.Panel(mainLogSplitter)
         mainPanelBox = wx.BoxSizer(wx.VERTICAL)
         mainPanel.SetSizer(mainPanelBox)
-        mainBox.Add(mainPanel, proportion=20, flag=wx.EXPAND)
 
         # Text field for output HTML
         self.outputHtml_ = wx.TextCtrl(mainPanel, name='Output HTML', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE)
@@ -132,11 +135,13 @@ class ThreadScreen(wx.Frame):
         # Labeled box, with layout:
         #
         # 'multi-line text field with log messages'
-        logBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
-        self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY, size=(150,150))
+        logBox = wx.StaticBoxSizer(wx.StaticBox(mainLogSplitter, wx.ID_ANY, 'Log'), wx.HORIZONTAL)
+        self.log_ = wx.TextCtrl(logBox.GetStaticBox(), name='Log', style=wx.TE_AUTO_SCROLL|wx.TE_DONTWRAP|wx.TE_MULTILINE|wx.TE_READONLY)
         logBox.Add(self.log_, proportion=1, flag=wx.EXPAND)
-        # Add logBox to main layout
-        mainBox.Add(logBox, proportion=0, flag=wx.EXPAND)
+
+        # Finally, add the splitter.
+        mainLogSplitter.SplitHorizontally(mainPanel, logBox.GetStaticBox())
+        mainBox.Add(mainLogSplitter, flag=wx.EXPAND, proportion=1)
 
         self.SetSizerAndFit(mainBox)
 
